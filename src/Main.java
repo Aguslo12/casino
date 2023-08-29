@@ -77,15 +77,32 @@ public class Main {
             jugada(j1, crupier);
         }
         System.out.println("\n\n" + j1.getNombre() + "\t\t\t\t\t\t\t\tCRUPIER");
-        int num = ThreadLocalRandom.current().nextInt(52);
-        int num3 = ThreadLocalRandom.current().nextInt(52); // NUMERO CARTA CRUPIER
-        int num2 = ThreadLocalRandom.current().nextInt(52);
+
+        // CREAMOS LOS NUMEROS RANDOMS PARA ELEGIR LAS CARTAS PRINCIPALES
+
+        int num = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
         Carta carta1 = cartasEnBaraja.get(num);
-        Carta carta3 = cartasEnBaraja.get(num3); // CARTA CRUPIER
+        cartasEnBaraja.remove(num);
+
+        int num2 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
         Carta carta2 = cartasEnBaraja.get(num2);
-        j1.agregarMano(carta1); // AGREGAMOS LAS CARTAS A LA MANO DEL JUGADOR
+        cartasEnBaraja.remove(num2);
+
+        int num3 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size()); // NUMERO CARTA CRUPIER 1
+        Carta carta3 = cartasEnBaraja.get(num3); // CARTA CRUPIER 1
+        cartasEnBaraja.remove(num3);
+
+        int num4 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size()); // NUMERO CARTA CRUPIER 2
+        Carta carta4 = cartasEnBaraja.get(num4); // CARTA CRUPIER 2
+        cartasEnBaraja.remove(num4);
+
+
+        // AGREGAMOS LAS CARTAS A LA MANO DEL JUGADOR
+        j1.agregarMano(carta1);
         j1.agregarMano(carta2);
         crupier.agregarMano(carta3); // AGREGAMOS CARTA A LA MANO DEL CRUPIER
+
+
         System.out.println(carta1.getValor() + " de " + carta1.getPalo());
         tiempoEspera();
         System.out.println("\t\t\t\t\t\t\t\t" + carta3.getValor() + " de " + carta3.getPalo());
@@ -100,40 +117,47 @@ public class Main {
         for (Carta carta : crupier.getMano()) {
             totalCru += carta.getValorNumerico();
         }
+        System.out.println("\t\t\t\t\t\t\t\t**************");
         System.out.println("TOTAL: " + (total) + "\t\t\t\t\t\t\t" +
                 "TOTAL: " + totalCru);
 
-        //DESCUBRIR RESULTADO
-        int mano = sigJug(total);
-        if (mano > 21) {
-            System.out.print("------------------------------------------------------\n" +
-                    "TE PASASTE\n-$" + apuesta +
-                    "------------------------------------------------------");
-            j1.setDinero(j1.getDinero() - apuesta);
 
-        } else if (mano == 21) {
-            System.out.println("------------------------------------------------------\n" +
-                    "BLACKJACK!\n+$" + apuesta * 2 +
-                    "------------------------------------------------------");
-            j1.setDinero(j1.getDinero() + apuesta);
-        } else {
-            if (mano > totalCru) {
-                System.out.println("------------------------------------------------------\n" +
-                        "GANASTE\n+$" + apuesta * 2 +
-                        "------------------------------------------------------");
-                j1.setDinero(j1.getDinero() + (apuesta * 2));
-            } else if (mano == totalCru) {
-                System.out.println("------------------------------------------------------\n" +
-                        "PUSH\n+$" + apuesta +
-                        "------------------------------------------------------");
-                j1.setDinero(j1.getDinero());
-            } else {
-                System.out.println("------------------------------------------------------\n" +
-                        "PERDISTE\n-$" + apuesta +
-                        "------------------------------------------------------");
-                j1.setDinero(j1.getDinero() - apuesta);
-            }
+        // ELEGIR QUE HACER
+        int mano = sigJug(total, j1, crupier, totalCru, apuesta);
+
+        // MOSTRAMOS LA SEGUNDA CARTA DEL CRUPIER
+        crupier.agregarMano(carta4);
+        totalCru=0;
+        for (Carta carta : crupier.getMano()) {
+            totalCru += carta.getValorNumerico();
         }
+
+        // MOSTRAMOS DE NUEVO LA MANO CON LA SUMA DE LA CARTA NUMERO 4
+        System.out.println("\n" + j1.getNombre() + "\t\t\t\t\t\t\t\tCRUPIER\n");
+        System.out.println(carta1.getValor() + " de " + carta1.getPalo());
+        tiempoEspera();
+        System.out.println("\t\t\t\t\t\t\t\t" + carta3.getValor() + " de " + carta3.getPalo());
+        tiempoEspera();
+        System.out.println(carta2.getValor() + " de " + carta2.getPalo());
+        tiempoEspera();
+        tiempoEspera();
+        System.out.println("\t\t\t\t\t\t\t\t" + carta4.getValor() + " de " + carta4.getPalo() + "\n");
+
+
+        // VALIDACION DE SI EL CRUPIER DEBE SACAR MAS CARTAS O NO
+        // IMPORTANTISIMO NO TOCAR
+        if (totalCru < 17){
+            totalCru = jugarCrupier(crupier, totalCru);
+        }
+
+
+        tiempoEspera();
+        System.out.println("TOTAL: " + (mano) + "\t\t\t\t\t\t\t" +
+                "TOTAL: " + totalCru);
+
+
+        // DESCUBRIR RESULTADO
+        descubrirResultado(mano, apuesta, j1, totalCru);
 
         // REINICIAMOS LA MANO DE DEL JUGADOR Y DEL CRUPIER PARA IMPEDIR SUMAR LA MANO ANTERIOR
         j1.reinicarMano();
@@ -149,27 +173,109 @@ public class Main {
         elegir(j1, crupier);
     }
 
-    public static int sigJug(int mano) {
-        System.out.println("------------------------------------------------------\n" +
+    public static int sigJug(int mano, Jugadores j1, Jugadores crupier, int totalCru, int apuesta) {
+        System.out.print("------------------------------------------------------\n" +
                 "1. QUEDARSE\n" +
                 "2. PEDIR\n" +
                 "3. DOBLAR\n" +
+                "4. RENDIRSE\n" +
                 "->");
         int decision = in.nextInt();
         switch (decision) {
             case 1:
                 return mano;
             case 2:
-                return mano;
+                int num1 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
+                Carta carta = cartasEnBaraja.get(num1);
+                cartasEnBaraja.remove(num1);
+                j1.agregarMano(carta);
+                System.out.println(carta.getValor() + " de " + carta.getPalo());
+                mano += carta.getValorNumerico();
+                System.out.println("TOTAL: " + (mano) + "\t\t\t\t\t\t\t" +
+                        "TOTAL: " + totalCru);
+                if (mano > 21) {
+                    return mano;
+                }
+                sigJug(mano, j1, crupier, totalCru, apuesta);
             case 3:
-                return mano;
+                int num2 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
+                Carta carta1 = cartasEnBaraja.get(num2);
+                cartasEnBaraja.remove(num2);
+                j1.agregarMano(carta1);
+                System.out.println(carta1.getValor() + " de " + carta1.getPalo());
+                mano += carta1.getValorNumerico();
+                System.out.println("TOTAL: " + (mano) + "\t\t\t\t\t\t\t" +
+                        "TOTAL: " + totalCru);
+                apuesta = apuesta *2;
+                descubrirResultado(mano,apuesta,j1,totalCru);
+                break;
+            case 4:
+                int mitad = apuesta / 2;
+                j1.setDinero(j1.getDinero() - apuesta + mitad);
+                System.out.println("+$" + mitad);
+                elegir(j1, crupier);
+                break;
         }
         return decision;
     }
 
+    public static int jugarCrupier(Jugadores crupier, int totalCru) {
+        while (totalCru < 17) {
+            int numCarta = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
+            Carta carta = cartasEnBaraja.get(numCarta);
+            cartasEnBaraja.remove(numCarta);
+            crupier.agregarMano(carta);
+            tiempoEspera();
+            totalCru = calcularTotalCrupier(crupier);
+            System.out.println("\t\t\t\t\t\t\t\t" + carta.getValor() + " de " + carta.getPalo() + "\n");
+        }
+        return totalCru;
+    }
+
+    public static int calcularTotalCrupier(Jugadores crupier) {
+        int total = 0;
+
+        for (Carta carta : crupier.getMano()) {
+            total += carta.getValorNumerico();
+        }
+
+        return total;
+    }
+
+    private static void descubrirResultado(int mano, int apuesta, Jugadores j1, int totalCru){
+        if (mano > 21) {
+            System.out.println("------------------------------------------------------\n" +
+                    "TE PASASTE\n-$" + apuesta +
+                    "\n------------------------------------------------------");
+            j1.setDinero(j1.getDinero() - apuesta);
+
+        } else if (mano == 21) {
+            System.out.println("------------------------------------------------------\n" +
+                    "BLACKJACK!\n+$" + apuesta * 2 +
+                    "\n------------------------------------------------------");
+            j1.setDinero(j1.getDinero() + apuesta);
+        } else {
+            if (mano > totalCru && totalCru < 21 || totalCru > 21) {
+                System.out.println("------------------------------------------------------\n" +
+                        "GANASTE\n+$" + apuesta * 2 +
+                        "\n------------------------------------------------------");
+                j1.setDinero(j1.getDinero() + (apuesta * 2));
+            } else if (mano == totalCru) {
+                System.out.println("------------------------------------------------------\n" +
+                        "PUSH\n+$" + apuesta +
+                        "\n------------------------------------------------------");
+                j1.setDinero(j1.getDinero());
+            } else if (mano < totalCru && totalCru < 21){
+                System.out.println("------------------------------------------------------\n" +
+                        "PERDISTE\n-$" + apuesta +
+                        "\n------------------------------------------------------");
+                j1.setDinero(j1.getDinero() - apuesta);
+            }
+        }
+    }
     public static void tiempoEspera() {
         try {
-            Thread.sleep(3000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
+            Thread.sleep(2000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

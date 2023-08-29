@@ -9,7 +9,7 @@ public class Jugadores {
 
     private int dinero;
 
-    private Set<Carta> mano;
+    private HashSet<Carta> mano;
 
 
     public Jugadores() {
@@ -22,11 +22,11 @@ public class Jugadores {
         this.mano = new HashSet<>();
     }
 
-    public Set<Carta> getMano() {
+    public HashSet<Carta> getMano() {
         return mano;
     }
 
-    public void setMano(Set<Carta> mano) {
+    public void setMano(HashSet<Carta> mano) {
         this.mano = mano;
     }
 
@@ -48,5 +48,9 @@ public class Jugadores {
 
     public void agregarMano(Carta carta){
         mano.add(carta);
+    }
+
+    public void reinicarMano(){
+        mano.clear();
     }
 }

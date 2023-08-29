@@ -59,15 +59,23 @@ public class Main {
                         "SU DINERO ACTUAL ES DE: $" + j1.getDinero()
                         + "\n------------------------------------------------------");
                 elegir(j1, crupier);
+                break;
             case 3:
                 System.exit(0);
+                break;
         }
     }
 
     //JUEGO
     public static void jugada(Jugadores j1, Jugadores crupier) {
+        int total = 0, totalCru = 0;
         System.out.print("Ingrese su apuesta\n->$");
         int apuesta = in.nextInt(); // APUESTA REALIZADA
+        if (apuesta > j1.getDinero()) { // VERIFICAMOS QUE LA APUESTA NO SEA MAYOR AL DINERO DISPONIBLE)
+            System.out.println("FONDOS NO DISPONIBLES!\n" +
+                    "-> DINERO " + j1.getNombre() + " $" + j1.getDinero());
+            jugada(j1, crupier);
+        }
         System.out.println("\n\n" + j1.getNombre() + "\t\t\t\t\t\t\t\tCRUPIER");
         int num = ThreadLocalRandom.current().nextInt(52);
         int num3 = ThreadLocalRandom.current().nextInt(52); // NUMERO CARTA CRUPIER
@@ -77,61 +85,94 @@ public class Main {
         Carta carta2 = cartasEnBaraja.get(num2);
         j1.agregarMano(carta1); // AGREGAMOS LAS CARTAS A LA MANO DEL JUGADOR
         j1.agregarMano(carta2);
+        crupier.agregarMano(carta3); // AGREGAMOS CARTA A LA MANO DEL CRUPIER
         System.out.println(carta1.getValor() + " de " + carta1.getPalo());
-        try {
-            Thread.sleep(3000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        tiempoEspera();
         System.out.println("\t\t\t\t\t\t\t\t" + carta3.getValor() + " de " + carta3.getPalo());
-        try {
-            Thread.sleep(3000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        tiempoEspera();
         System.out.println(carta2.getValor() + " de " + carta2.getPalo());
-        try {
-            Thread.sleep(1000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("TOTAL: " + (carta1.getValorNumerico() + carta2.getValorNumerico()) + "\t\t\t\t\t\t\t" +
-                "TOTAL: " + carta3.getValorNumerico());
+        tiempoEspera();
 
-        // SACAMOS LOS RESULTADOS DE LA APUESTA
-        if (sigJug(apuesta)>21){
-            System.out.printf("TE PASASTE!!!");
-        } else if(sigJug(apuesta)==21){
-            System.out.println("BLACKJACK!");
-            j1.setDinero(j1.getDinero()+apuesta);
-        } else{
-            if (sigJug(apuesta) > carta3.getValorNumerico()){
-                j1.setDinero(j1.getDinero()+(apuesta*2));
-            }else if(sigJug(apuesta) == carta3.getValorNumerico()){
+        // SUMAR CARTAS DE LA MANO DEL JUGADOR A TRAVES DE UN FOREACH
+        for (Carta carta : j1.getMano()) {
+            total += carta.getValorNumerico();
+        }
+        for (Carta carta : crupier.getMano()) {
+            totalCru += carta.getValorNumerico();
+        }
+        System.out.println("TOTAL: " + (total) + "\t\t\t\t\t\t\t" +
+                "TOTAL: " + totalCru);
+
+        //DESCUBRIR RESULTADO
+        int mano = sigJug(total);
+        if (mano > 21) {
+            System.out.print("------------------------------------------------------\n" +
+                    "TE PASASTE\n-$" + apuesta +
+                    "------------------------------------------------------");
+            j1.setDinero(j1.getDinero() - apuesta);
+
+        } else if (mano == 21) {
+            System.out.println("------------------------------------------------------\n" +
+                    "BLACKJACK!\n+$" + apuesta * 2 +
+                    "------------------------------------------------------");
+            j1.setDinero(j1.getDinero() + apuesta);
+        } else {
+            if (mano > totalCru) {
+                System.out.println("------------------------------------------------------\n" +
+                        "GANASTE\n+$" + apuesta * 2 +
+                        "------------------------------------------------------");
+                j1.setDinero(j1.getDinero() + (apuesta * 2));
+            } else if (mano == totalCru) {
+                System.out.println("------------------------------------------------------\n" +
+                        "PUSH\n+$" + apuesta +
+                        "------------------------------------------------------");
                 j1.setDinero(j1.getDinero());
-            }else{
-                j1.setDinero(j1.getDinero()-apuesta);
+            } else {
+                System.out.println("------------------------------------------------------\n" +
+                        "PERDISTE\n-$" + apuesta +
+                        "------------------------------------------------------");
+                j1.setDinero(j1.getDinero() - apuesta);
             }
         }
+
+        // REINICIAMOS LA MANO DE DEL JUGADOR Y DEL CRUPIER PARA IMPEDIR SUMAR LA MANO ANTERIOR
+        j1.reinicarMano();
+        crupier.reinicarMano();
+
+        // VERIFICAMOS BANCARROTA
+        if (j1.getDinero() <= 0) {
+            System.out.println("BANCARROTA!!!!!");
+            System.exit(0);
+        }
+
+        // VUELVE A LA FUNCION ELEGIR PARA DAR LA POSIBILIDAD DE VOLVER A JUGAR
+        elegir(j1, crupier);
     }
 
-    public static int sigJug(int apuesta) {
+    public static int sigJug(int mano) {
         System.out.println("------------------------------------------------------\n" +
                 "1. QUEDARSE\n" +
                 "2. PEDIR\n" +
                 "3. DOBLAR\n" +
                 "->");
         int decision = in.nextInt();
-        switch (decision){
+        switch (decision) {
             case 1:
-                return apuesta;
+                return mano;
             case 2:
-                break;
+                return mano;
             case 3:
-                apuesta = apuesta * 2;
-                return apuesta;
-        };
+                return mano;
+        }
         return decision;
+    }
+
+    public static void tiempoEspera() {
+        try {
+            Thread.sleep(3000); // TIEMPO DE ESPERA PARA GENERAR REALISMO
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

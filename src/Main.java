@@ -34,9 +34,6 @@ public class Main {
                 cartasEnBaraja.add(new Carta(valor, palo));
             }
         }
-        for (Carta carta : cartasEnBaraja) {
-            System.out.println(carta.getValor() + " de " + carta.getPalo());
-        }
     }
 
     // Funcion que permite elegir al jugador que hacer

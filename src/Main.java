@@ -135,12 +135,8 @@ public class Main {
         // MOSTRAMOS DE NUEVO LA MANO CON LA SUMA DE LA CARTA NUMERO 4
         System.out.println("\n" + j1.getNombre() + "\t\t\t\t\t\t\t\tCRUPIER\n");
         System.out.println(carta1.getValor() + " de " + carta1.getPalo());
-        tiempoEspera();
         System.out.println("\t\t\t\t\t\t\t\t" + carta3.getValor() + " de " + carta3.getPalo());
-        tiempoEspera();
         System.out.println(carta2.getValor() + " de " + carta2.getPalo());
-        tiempoEspera();
-        tiempoEspera();
         System.out.println("\t\t\t\t\t\t\t\t" + carta4.getValor() + " de " + carta4.getPalo() + "\n");
 
 
@@ -174,12 +170,13 @@ public class Main {
     }
 
     public static int sigJug(int mano, Jugadores j1, Jugadores crupier, int totalCru, int apuesta) {
-        System.out.print("------------------------------------------------------\n" +
-                "1. QUEDARSE\n" +
-                "2. PEDIR\n" +
-                "3. DOBLAR\n" +
-                "4. RENDIRSE\n" +
-                "->");
+        System.out.print("""
+                ------------------------------------------------------
+                1. QUEDARSE
+                2. PEDIR
+                3. DOBLAR
+                4. RENDIRSE
+                ->""");
         int decision = in.nextInt();
         switch (decision) {
             case 1:
@@ -195,8 +192,10 @@ public class Main {
                         "TOTAL: " + totalCru);
                 if (mano > 21) {
                     return mano;
+                } else{
+                    sigJug(mano, j1, crupier, totalCru, apuesta);
+                    return mano;
                 }
-                sigJug(mano, j1, crupier, totalCru, apuesta);
             case 3:
                 int num2 = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
                 Carta carta1 = cartasEnBaraja.get(num2);
@@ -255,7 +254,7 @@ public class Main {
                     "\n------------------------------------------------------");
             j1.setDinero(j1.getDinero() + apuesta);
         } else {
-            if (mano > totalCru && totalCru < 21 || totalCru > 21) {
+            if (mano > totalCru || totalCru > 21) {
                 System.out.println("------------------------------------------------------\n" +
                         "GANASTE\n+$" + apuesta * 2 +
                         "\n------------------------------------------------------");
@@ -265,7 +264,7 @@ public class Main {
                         "PUSH\n+$" + apuesta +
                         "\n------------------------------------------------------");
                 j1.setDinero(j1.getDinero());
-            } else if (mano < totalCru && totalCru < 21){
+            } else if (totalCru < 21){
                 System.out.println("------------------------------------------------------\n" +
                         "PERDISTE\n-$" + apuesta +
                         "\n------------------------------------------------------");
@@ -280,5 +279,4 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 }

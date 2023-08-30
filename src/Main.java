@@ -8,6 +8,7 @@ public class Main {
     private static List<Carta> cartasEnBaraja = new ArrayList<>();
     private static Scanner in = new Scanner(System.in).useDelimiter("\n");
 
+    // BIENVENIDA
     public static void main(String[] args) {
         baraja();
         System.out.println("BIENVENIDO A BLACKJACK!");
@@ -22,7 +23,7 @@ public class Main {
 
     }
 
-    // Creamos la baraja
+    // CREAMOS LA BARAJA
     public static void baraja() {
 
         String[] palos = {"Corazones", "Diamantes", "Tréboles", "Picas"};
@@ -36,7 +37,7 @@ public class Main {
         }
     }
 
-    // Funcion que permite elegir al jugador que hacer
+    // FUNCION QUE PERMITE AL JUGADOR ELEGIR QUE HACER
     public static void elegir(Jugadores j1, Jugadores crupier) {
         System.out.print("1. JUGAR\n2. VER DINERO\n3. SALIR\n->");
         int decision = in.nextInt();
@@ -66,7 +67,7 @@ public class Main {
         }
     }
 
-    //JUEGO
+    // JUEGO
     public static void jugada(Jugadores j1, Jugadores crupier) {
         int total = 0, totalCru = 0;
         System.out.print("Ingrese su apuesta\n->$");
@@ -159,6 +160,18 @@ public class Main {
         j1.reinicarMano();
         crupier.reinicarMano();
 
+        // VERIFICAMOS CUANTAS CARTAS QUEDAN DENTRO DEL MAZO Y SE REINICIA LA BARAJA
+
+        if(cartasEnBaraja.size() <= 15){
+            System.out.println("POCAS CARTAS EN EL MAZO!\n" +
+                    "ESPERE MIENTRAS SE MEZCLA UNO NUEVO");
+            tiempoEspera();
+            System.out.println("JUEGO REANUDADO");
+            tiempoEspera();
+            cartasEnBaraja.clear();
+            baraja();
+        }
+
         // VERIFICAMOS BANCARROTA
         if (j1.getDinero() <= 0) {
             System.out.println("BANCARROTA!!!!!");
@@ -169,6 +182,7 @@ public class Main {
         elegir(j1, crupier);
     }
 
+    // LUEGO DE LA ENTREGA DE LA PRIMERA MANO LE DECIMOS AL JUGADOR QUE QUIERE HACER
     public static int sigJug(int mano, Jugadores j1, Jugadores crupier, int totalCru, int apuesta) {
         System.out.print("""
                 ------------------------------------------------------
@@ -218,6 +232,7 @@ public class Main {
         return decision;
     }
 
+    // FUNCION PARA CUANDO EL CRUPIER DEBE JUGAR
     public static int jugarCrupier(Jugadores crupier, int totalCru) {
         while (totalCru < 17) {
             int numCarta = ThreadLocalRandom.current().nextInt(cartasEnBaraja.size());
@@ -231,6 +246,7 @@ public class Main {
         return totalCru;
     }
 
+    // CALCULA EL TOTAL DE PUNTOS QUE TIENE EL CRUPIER
     public static int calcularTotalCrupier(Jugadores crupier) {
         int total = 0;
 
@@ -241,6 +257,7 @@ public class Main {
         return total;
     }
 
+    // TE DICE EL RESULTADO DE LA APUESTA
     private static void descubrirResultado(int mano, int apuesta, Jugadores j1, int totalCru){
         if (mano > 21) {
             System.out.println("------------------------------------------------------\n" +

@@ -1,3 +1,5 @@
+package blackJack;
+
 public class Carta {
 
     private String valor;

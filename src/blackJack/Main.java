@@ -11,7 +11,7 @@ public class Main {
     private static Scanner in = new Scanner(System.in).useDelimiter("\n");
 
     // BIENVENIDA
-    public static void main(String[] args) {
+    public static void inicioBJ() {
         baraja();
         System.out.println("BIENVENIDO A BLACKJACK!");
         System.out.print("Ingrese su nombre: \n->");
@@ -41,7 +41,7 @@ public class Main {
 
     // FUNCION QUE PERMITE AL JUGADOR ELEGIR QUE HACER
     public static void elegir(Jugadores j1, Jugadores crupier) {
-        System.out.print("1. JUGAR\n2. VER DINERO\n3. SALIR\n->");
+        System.out.print("1. JUGAR\n2. VER DINERO\n3. VOLVER AL MENU PRINCIPAL\n->");
         int decision = in.nextInt();
         switch (decision) {
             case 1:
@@ -64,8 +64,11 @@ public class Main {
                 elegir(j1, crupier);
                 break;
             case 3:
-                System.exit(0);
+                menuPpal.Main.main(new String[]{});
                 break;
+            default:
+                System.out.println("OPCION INCORRECTA. POR FAVOR INGRESE UNA OPCION VALIDA");
+                elegir(j1, crupier);
         }
     }
 
